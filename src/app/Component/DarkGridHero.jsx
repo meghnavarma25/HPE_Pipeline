@@ -2,102 +2,124 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { twMerge } from "tailwind-merge";
-import {ButtonWrapper} from "./ButtonWrapper";
+import { ButtonWrapper } from "./ButtonWrapper";
 
 export const DarkGridHero = () => {
   const [text, setText] = useState("");
   const [model, setModel] = useState("default");
-  const [prediction, setPrediction] = useState("Write the Query to be classified and choose the model");
+  const [prediction, setPrediction] = useState("");
+  const [activeDescription, setActiveDescription] = useState(null);
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    const result = await fetch("http://127.0.0.1:8000/classify", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        text: text,
-        type: model,
-      }),
-    });
-    const data = await result.json();
-    setPrediction(data.prediction); // Always update
-  } catch (error) {
-    console.error("Prediction error:", error);
-  }
-};
+    e.preventDefault();
+    try {
+      const result = await fetch("http://127.0.0.1:8000/classify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: text,
+          type: model,
+        }),
+      });
+      const data = await result.json();
+      setPrediction(data.prediction);
+    } catch (error) {
+      console.error("Prediction error:", error);
+    }
+  };
 
+  const modelDescriptions = {
+    default: "A model that passes the query from Ensemble and Roberta and if the answer is different then vertifies the correct answer from chatgpt model ",
+    Ensemble: "Combines multiple models for improved accuracy.",
+    Roberta: "A transformer-based model fine-tuned for NLP tasks.",
+    Chatgpt: "Uses ChatGPT's API for semantic understanding.",
+  };
 
   return (
     <section className="hero relative overflow-hidden bg-[#0B1134] min-h-screen">
-      <Content
-        text={text}
-        setText={setText}
-        model={model}
-        setModel={setModel}
-        prediction={prediction}
-        handleSubmit={handleSubmit}
-      />
+      <div className="relative z-20 mx-auto flex max-w-6xl flex-col items-center justify-center px-4 py-24 md:px-8 md:py-36">
+        <motion.div
+          initial={{ y: 25, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 1.25, ease: "easeInOut" }}
+          className="relative"
+        >
+          <GlowingChip>Query Classification</GlowingChip>
+        </motion.div>
+
+        <motion.h1
+          initial={{ y: 25, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 1.25, delay: 0.25, ease: "easeInOut" }}
+          className="mb-3 text-center text-3xl font-bold leading-tight text-zinc-50 sm:text-4xl md:text-5xl lg:text-7xl"
+        >
+          Write the Query to be classified and choose the model
+        </motion.h1>
+
+        <motion.div
+          initial={{ y: 25, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 1.25, delay: 0.5, ease: "easeInOut" }}
+          className="mb-9 max-w-2xl text-center text-base leading-relaxed text-zinc-400 sm:text-lg"
+        >
+          <div className="flex justify-center gap-4 mt-4 flex-wrap relative">
+            {["default", "Ensemble", "Roberta", "Chatgpt"].map((item) => (
+              <div key={item} className="relative">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setActiveDescription(activeDescription === item ? null : item)
+                    }
+                    className="text-white text-lg font-bold hover:text-blue-400"
+                  >
+                    ➕
+                  </button>
+                  <ButtonWrapper
+                    item={item}
+                    selected={model === item}
+                    onClick={() => setModel(item)}
+                  />
+                </div>
+
+                {activeDescription === item && (
+                  <div className="absolute top-[42px] w-max bg-zinc-800 text-white text-sm px-4 py-2 rounded-md shadow-lg z-50">
+                    {modelDescriptions[item]}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        <form onSubmit={handleSubmit} className="w-full flex flex-col items-center gap-4">
+          <input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            className="w-[80%] md:w-[60%] box-border border border-white-600/2 p-4 rounded-full"
+            type="text"
+            placeholder="Enter your query..."
+          />
+          <button
+            type="submit"
+            className="px-6 py-2 font-medium bg-violet-400 text-white w-fit transition-all shadow-[3px_3px_0px_white] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px]"
+          >
+            Predict Class
+          </button>
+        </form>
+
+        <br />
+        <br />
+        <h1 className="mb-3 text-center text-4xl font-bold leading-tight text-zinc-50">
+          {prediction}
+        </h1>
+      </div>
+
       <Beams />
       <GradientGrid />
     </section>
-  );
-};
-
-const Content = ({ text, setText, model, setModel, prediction, handleSubmit }) => {
-  return (
-    <div className="content relative z-20 mx-auto flex max-w-6xl flex-col items-center justify-center px-4 py-24 md:px-8 md:py-36">
-      <motion.div
-        initial={{ y: 25, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 1.25, ease: "easeInOut" }}
-        className="relative"
-      >
-        <GlowingChip>HPE's Query Classification</GlowingChip>
-      </motion.div>
-
-      <motion.h1
-        initial={{ y: 25, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 1.25, delay: 0.25, ease: "easeInOut" }}
-        className="mb-3 text-center text-3xl font-bold leading-tight text-zinc-50 sm:text-4xl md:text-5xl lg:text-7xl"
-      >
-        {prediction}
-      </motion.h1>
-
-      <motion.div
-        initial={{ y: 25, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 1.25, delay: 0.5, ease: "easeInOut" }}
-        className="mb-9 max-w-2xl text-center text-base leading-relaxed text-zinc-400 sm:text-lg"
-      >
-      <div className="flex justify-center gap-4 mt-8 flex-wrap">
-        {["default", "Ensemble", "Roberta", "Chatgpt"].map((item) => (
-          <ButtonWrapper
-            key={item}
-            item={item}
-            selected={model === item}
-            onClick={() => setModel(item)}
-          />
-        ))}
-      </div>
-      </motion.div>
-
-      <form onSubmit={handleSubmit} className="w-full flex flex-col items-center gap-4">
-        <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          className="w-[80%] md:w-[60%] box-border border border-white-600/2 p-4 rounded-full"
-          type="text"
-          placeholder="Enter your query..."
-        />
-        <button type="submit" className="px-6 py-2 font-medium bg-violet-400 text-white w-fit transition-all shadow-[3px_3px_0px_white] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px]">
-          Pedict Class
-        </button>
-      </form>
-    </div>
   );
 };
 
@@ -108,19 +130,6 @@ const GlowingChip = ({ children }) => (
   </span>
 );
 
-const SplashButton = ({ children, className, ...rest }) => (
-  <button
-    className={twMerge(
-      "rounded-md bg-gradient-to-br from-blue-400 to-blue-700 px-4 py-2 text-zinc-50 ring-2 ring-blue-500/50 ring-offset-2 ring-offset-zinc-950 transition-all hover:scale-[1.02] hover:ring-transparent active:scale-[0.98] active:ring-blue-500/70",
-      className
-    )}
-    {...rest}
-  >
-    {children}
-  </button>
-);
-
-// Beam animations
 const Beams = () => {
   const { width } = useWindowSize();
   const numColumns = width ? Math.floor(width / GRID_BOX_SIZE) : 0;
@@ -172,7 +181,6 @@ const useWindowSize = () => {
   return windowSize;
 };
 
-// Background Grid
 const GradientGrid = () => (
   <motion.div
     initial={{ opacity: 0 }}
