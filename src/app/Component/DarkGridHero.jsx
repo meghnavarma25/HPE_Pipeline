@@ -13,7 +13,7 @@ export const DarkGridHero = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const result = await fetch("http://15.207.55.161/classify", {
+      const result = await fetch("http://43.204.234.191/classify", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
