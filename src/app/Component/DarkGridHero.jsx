@@ -13,16 +13,16 @@ export const DarkGridHero = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const result = await fetch("http://43.204.234.191/classify", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          text: text,
-          type: model,
-        }),
-      });
+      const result = await fetch("/api/proxy", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        text: text,
+        type: model,
+      }),
+    });
       const data = await result.json();
       setPrediction(data.prediction);
     } catch (error) {
